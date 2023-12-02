@@ -11,14 +11,19 @@ fn main() {
 }
 
 fn part_2(lines: Vec<String>) {
-    let possible_games: Vec<Game> = lines.iter()
+    let games: Vec<Game> = lines.iter()
         .map(|line| Game::from(line))
-        .filter(|game| game.is_possible())
         .collect();
 
-    let sum_of_ids: i16 = possible_games.iter().fold(0, |acc, e| acc + i16::from(e.id));
+    let possible_games = games.iter()
+        .filter(|game| game.is_possible());
+    let part_1_result: i16 = possible_games.fold(0, |acc, e| acc + i16::from(e.id));
+    println!("{part_1_result}");
 
-    println!("{sum_of_ids}")
+    let minimum_sets_powers = games.iter()
+        .map(|game| game.minimum_set_power());
+    let part_2_result: i32 = minimum_sets_powers.fold(0, |acc, e| acc + e);
+    println!("{part_2_result}");
 }
 
 #[derive(Debug)]
@@ -47,6 +52,25 @@ impl Game {
         let possible_sets_count = self.sets.iter().filter(|set| set.is_possible()).count();
         let all_sets_count = self.sets.iter().count();
         return possible_sets_count == all_sets_count;
+    }
+
+    fn minimum_set_power(&self) -> i32 {
+        let minimum_blue_cubes_needed = self.sets.iter()
+            .map(|set| set.blue_cubes)
+            .max()
+            .unwrap_or(0);
+
+        let minimum_red_cubes_needed = self.sets.iter()
+            .map(|set| set.red_cubes)
+            .max()
+            .unwrap_or(0);
+
+        let minimum_green_cubes_needed = self.sets.iter()
+            .map(|set| set.green_cubes)
+            .max()
+            .unwrap_or(0);
+
+        return i32::from(minimum_blue_cubes_needed) * i32::from(minimum_red_cubes_needed) * i32::from(minimum_green_cubes_needed)
     }
 }
 
