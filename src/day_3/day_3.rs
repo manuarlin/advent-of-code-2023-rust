@@ -1,4 +1,5 @@
 use std::cmp::min;
+use std::collections::HashMap;
 
 use crate::utils::read_file;
 
@@ -37,21 +38,37 @@ pub fn day_3() {
 
     let mut part_numbers_values: Vec<i64> = vec!();
 
+    let mut gears_map: HashMap<(usize, usize), (i64, Option<i64>)> = HashMap::new();
+
     for number in numbers {
         let (start_coordinates_i, start_coordinates_j) = number.start_coordinates;
         let (end_coordinates_i, _) = number.end_coordinates;
-        for line in &lines[start_coordinates_j.saturating_sub(1)..=min(lines_length - 1, start_coordinates_j + 1)] {
-            for char in &line.as_bytes()[start_coordinates_i.saturating_sub(1)..=min(end_coordinates_i + 1, line_length - 1)] {
-                let char = *char as char;
+        for i in start_coordinates_j.saturating_sub(1)..=min(lines_length - 1, start_coordinates_j + 1) {
+            let line = &lines[i].as_bytes();
+            for j in start_coordinates_i.saturating_sub(1)..=min(end_coordinates_i + 1, line_length - 1) {
+                let char = line[j] as char;
                 if char != '.' && !char.is_digit(10) {
-                    part_numbers_values.push(number.value)
+                    part_numbers_values.push(number.value);
+                }
+                if char == '*' {
+                    if gears_map.contains_key(&(i, j)) {
+                        let (first_value, _) = gears_map.get(&(i, j)).unwrap();
+                        gears_map.insert((i, j), (*first_value, Some(number.value)));
+                    } else {
+                        gears_map.insert((i, j), (number.value, None));
+                    }
                 }
             }
         }
     }
 
     let sum: i64 = part_numbers_values.iter().sum();
-    println!("{sum}")
+    println!("Part 1: {sum}");
+
+    let sum_gear_power: i64 = gears_map.into_iter()
+        .filter(|(_, (_, second_value))| second_value.is_some())
+        .fold(0, |acc, (_, (first_value, second_value))| acc + first_value * second_value.unwrap());
+    println!("Part 2: {sum_gear_power}");
 }
 
 struct Number {
