@@ -48,22 +48,29 @@ pub fn day_5() {
         )
         .collect();
 
-    let min_location =seeds.iter().map(|seed| seed_to_location(*seed, &map))
+    let see_to_soil_mapper = map.get("seed-to-soil").unwrap();
+    let soil_to_fertilizer_mapper = map.get("soil-to-fertilizer").unwrap();
+    let fertilizer_to_water_mapper = map.get("fertilizer-to-water").unwrap();
+    let water_to_light_mapper = map.get("water-to-light").unwrap();
+    let light_to_temperature_mapper = map.get("light-to-temperature").unwrap();
+    let temperature_to_humidity_mapper = map.get("temperature-to-humidity").unwrap();
+    let humidity_to_location_mapper = map.get("humidity-to-location").unwrap();
+
+    let min_location = seeds.iter().enumerate().map(|(index, seed)| {
+        let soil = see_to_soil_mapper.get_value(*seed);
+        let fertilizer = soil_to_fertilizer_mapper.get_value(soil);
+        let water = fertilizer_to_water_mapper.get_value(fertilizer);
+        let light = water_to_light_mapper.get_value(water);
+        let temperature = light_to_temperature_mapper.get_value(light);
+        let humidity = temperature_to_humidity_mapper.get_value(temperature);
+        let location = humidity_to_location_mapper.get_value(humidity);
+        location
+    }
+    )
         .min()
         .unwrap();
 
     println!("{min_location}");
-}
-
-fn seed_to_location(seed: i64, map: &HashMap<&str, Map>) -> i64 {
-    let soil = map.get("seed-to-soil").unwrap().get_value(seed);
-    let fertilizer = map.get("soil-to-fertilizer").unwrap().get_value(soil);
-    let water = map.get("fertilizer-to-water").unwrap().get_value(fertilizer);
-    let light = map.get("water-to-light").unwrap().get_value(water);
-    let temperature = map.get("light-to-temperature").unwrap().get_value(light);
-    let humidity = map.get("temperature-to-humidity").unwrap().get_value(temperature);
-    let location = map.get("humidity-to-location").unwrap().get_value(humidity);
-    location
 }
 
 #[derive(Debug)]
@@ -77,10 +84,9 @@ impl Map {
     }
 
     fn get_value(&self, source: i64) -> i64 {
-        let matching_mappings: Vec<&Mapping> = self.mappings.iter()
-            .filter(|mapping| (mapping.source_range_start..(mapping.source_range_start + mapping.range_length)).contains(&source))
-            .collect();
-        matching_mappings.get(0).map(|mapping| mapping.map(source)).unwrap_or(source)
+        let matching_mappings: Option<&Mapping> = self.mappings.iter()
+            .find(|mapping| (mapping.source_range_start..(mapping.source_range_start + mapping.range_length)).contains(&source));
+        matching_mappings.map(|mapping| mapping.map(source)).unwrap_or(source)
     }
 }
 
