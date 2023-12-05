@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use crate::utils::read_file;
 
+#[warn(unused_assignments)]
 pub fn day_3() {
     let lines = read_file::read_lines("day3");
 
@@ -32,7 +33,6 @@ pub fn day_3() {
         if number_value != "" {
             number_end_coordinates = (line_length -1, j);
             numbers.push(Number::from(number_value.parse::<i64>().unwrap(), number_start_coordinated, number_end_coordinates));
-            number_value = String::from("");
         }
     }
 
