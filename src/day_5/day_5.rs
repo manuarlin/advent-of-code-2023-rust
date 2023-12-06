@@ -56,7 +56,7 @@ pub fn day_5() {
     let temperature_to_humidity_mapper = map.get("temperature-to-humidity").unwrap();
     let humidity_to_location_mapper = map.get("humidity-to-location").unwrap();
 
-    let min_location = seeds.iter().enumerate().map(|(index, seed)| {
+    let min_location = seeds.iter().map(|seed| {
         let soil = see_to_soil_mapper.get_value(*seed);
         let fertilizer = soil_to_fertilizer_mapper.get_value(soil);
         let water = fertilizer_to_water_mapper.get_value(fertilizer);
